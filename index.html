@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>모들(Model) 서재 - 독서모임 책장</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Pretendard:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-green: #3f5135;
+      --secondary-green: #526640;
+      --bg-cream: #fbf9f5;
+      --wood-shelf: #785a3c;
+      --wood-shadow: #4d3620;
+      --card-bg: #ffffff;
+      --text-main: #2b2b2b;
+      --text-muted: #6c757d;
+    }
+    body {
+      background-color: var(--bg-cream);
+      color: var(--text-main);
+      font-family: 'Pretendard', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .font-serif {
+      font-family: 'Gowun Batang', serif;
+    }
+    .navbar-modeul {
+      background-color: var(--primary-green);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    .stat-badge {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 20px;
+      padding: 0.35rem 0.85rem;
+      font-size: 0.85rem;
+      color: #fff;
+    }
+    /* 책장 뷰 스타일 */
+    .bookshelf-shelf {
+      position: relative;
+      background: linear-gradient(180deg, #93734e 0%, var(--wood-shelf) 60%, var(--wood-shadow) 100%);
+      height: 16px;
+      border-radius: 4px;
+      box-shadow: 0 6px 10px rgba(0,0,0,0.18);
+      margin-bottom: 2.5rem;
+      margin-top: -0.5rem;
+    }
+    .book-card {
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      cursor: pointer;
+    }
+    .book-card:hover {
+      transform: translateY(-8px);
+    }
+    .book-spine-effect {
+      position: relative;
+      border-radius: 4px 8px 8px 4px;
+      overflow: hidden;
+      box-shadow: -4px 6px 12px rgba(0,0,0,0.18);
+      aspect-ratio: 1 / 1.45;
+      background-color: #eee;
+    }
+    .book-spine-effect::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 14px;
+      background: linear-gradient(to right, rgba(0,0,0,0.3) 0%, rgba(255,255,255,0.2) 40%, rgba(0,0,0,0.15) 100%);
+      z-index: 2;
+    }
+    .book-cover-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .search-panel {
+      background: #ffffff;
+      border-radius: 12px;
+      border: 1px solid rgba(0,0,0,0.06);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .btn-modeul {
+      background-color: var(--secondary-green);
+      color: white;
+      border: none;
+    }
+    .btn-modeul:hover {
+      background-color: var(--primary-green);
+      color: white;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 상단 네비게이션 -->
+  <nav class="navbar navbar-expand-lg navbar-modeul py-3 text-white">
+    <div class="container">
+      <div class="d-flex align-items-center gap-2">
+        <i class="fa-solid fa-book-open fs-4 text-warning"></i>
+        <div>
+          <h1 class="h5 m-0 font-serif fw-bold tracking-tight">모들(Model) 서재</h1>
+          <small class="opacity-75" style="font-size: 0.75rem;">말씀과 삶을 잇는 우리들의 책장</small>
+        </div>
+      </div>
+      <div class="d-flex align-items-center gap-3 ms-auto mt-2 mt-lg-0">
+        <span class="stat-badge d-none d-sm-inline-block">
+          <i class="fa-solid fa-bookmark me-1"></i> 총 <span id="totalBooksCount">0</span>권
+        </span>
+        <button class="btn btn-warning btn-sm fw-bold px-3 shadow-sm rounded-pill" data-bs-toggle="modal" data-bs-target="#addBookModal">
+          <i class="fa-solid fa-plus me-1"></i> 책 등록
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- 검색 및 필터 패널 -->
+  <main class="container my-4 flex-grow-1">
+    <div class="search-panel p-3 mb-4">
+      <div class="row g-2 align-items-center">
+        <div class="col-12 col-md-5">
+          <div class="input-group">
+            <span class="input-group-text bg-transparent border-end-0 text-muted">
+              <i class="fa-solid fa-magnifying-glass"></i>
+            </span>
+            <input type="text" id="searchInput" class="form-control border-start-0 ps-0" placeholder="도서명, 저자, 출판사 검색...">
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <select id="categoryFilter" class="form-select">
+            <option value="ALL">전체 분야</option>
+            <option value="신앙/영성">신앙/영성</option>
+            <option value="기독교인문">기독교인문</option>
+            <option value="성경/신학">성경/신학</option>
+            <option value="문화/사회">문화/사회</option>
+            <option value="기타">기타</option>
+          </select>
+        </div>
+        <div class="col-6 col-md-2">
+          <select id="yearFilter" class="form-select">
+            <option value="ALL">전체 연도</option>
+          </select>
+        </div>
+        <div class="col-12 col-md-2 text-end">
+          <div class="btn-group w-100" role="group">
+            <button type="button" class="btn btn-outline-secondary btn-sm active" id="viewGridBtn">
+              <i class="fa-solid fa-table-cells-large"></i> 책장
+            </button>
+            <button type="button" class="btn btn-outline-secondary btn-sm" id="viewTableBtn">
+              <i class="fa-solid fa-list"></i> 목록
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 로딩 스피너 -->
+    <div id="loadingBox" class="text-center py-5">
+      <div class="spinner-border text-success" role="status"></div>
+      <p class="text-muted mt-2 font-serif">구글 시트에서 책 목록을 불러오는 중입니다...</p>
+    </div>
+
+    <!-- 뷰 영역 -->
+    <div id="booksGridContainer" class="d-none"></div>
+    <div id="booksTableContainer" class="d-none table-responsive bg-white rounded-3 shadow-sm p-3 mb-4">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th style="width: 80px;">표지</th>
+            <th>도서명</th>
+            <th>저자</th>
+            <th>출판사</th>
+            <th>모임 일자</th>
+            <th>분류</th>
+          </tr>
+        </thead>
+        <tbody id="booksTableBody"></tbody>
+      </table>
+    </div>
+
+    <!-- 검색 결과 없을 때 -->
+    <div id="emptyState" class="text-center py-5 d-none">
+      <i class="fa-solid fa-book-open-reader fs-1 text-muted opacity-50 mb-3"></i>
+      <h6 class="text-muted font-serif">조건에 일치하는 도서가 없습니다.</h6>
+    </div>
+  </main>
+
+  <!-- 도서 등록 모달 -->
+  <div class="modal fade" id="addBookModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow">
+        <div class="modal-header bg-light">
+          <h5 class="modal-title font-serif fw-bold"><i class="fa-solid fa-book me-2 text-success"></i>새 도서 등록</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4">
+          <!-- 도서 자동 검색 바 -->
+          <div class="mb-3">
+            <label class="form-label small fw-bold text-success"><i class="fa-solid fa-wand-magic-sparkles me-1"></i>도서 제목 자동 검색</label>
+            <div class="input-group">
+              <input type="text" id="autoBookTitle" class="form-control" placeholder="책 제목을 입력 후 검색">
+              <button class="btn btn-modeul" type="button" id="btnSearchCover">
+                <i class="fa-solid fa-magnifying-glass"></i> 검색
+              </button>
+            </div>
+            <div id="searchResultsDropdown" class="list-group position-relative mt-1 d-none" style="max-height: 180px; overflow-y: auto; z-index: 1055;"></div>
+          </div>
+
+          <hr class="my-3 opacity-25">
+
+          <form id="bookForm">
+            <div class="mb-3">
+              <label class="form-label small fw-bold">도서명 *</label>
+              <input type="text" id="inputTitle" class="form-control" required>
+            </div>
+            <div class="row g-2 mb-3">
+              <div class="col-6">
+                <label class="form-label small fw-bold">저자</label>
+                <input type="text" id="inputAuthor" class="form-control">
+              </div>
+              <div class="col-6">
+                <label class="form-label small fw-bold">출판사</label>
+                <input type="text" id="inputPublisher" class="form-control">
+              </div>
+            </div>
+            <div class="row g-2 mb-3">
+              <div class="col-6">
+                <label class="form-label small fw-bold">모임 일자</label>
+                <input type="date" id="inputDate" class="form-control">
+              </div>
+              <div class="col-6">
+                <label class="form-label small fw-bold">분류</label>
+                <select id="inputCategory" class="form-select">
+                  <option value="신앙/영성">신앙/영성</option>
+                  <option value="기독교인문">기독교인문</option>
+                  <option value="성경/신학">성경/신학</option>
+                  <option value="문화/사회">문화/사회</option>
+                  <option value="기타">기타</option>
+                </select>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-bold">표지 이미지 주소 (URL)</label>
+              <input type="url" id="inputCover" class="form-control" placeholder="https://...">
+            </div>
+            <div class="d-flex justify-content-end gap-2 mt-4">
+              <button type="button" class="btn btn-light" data-bs-dismiss="modal">취소</button>
+              <button type="submit" class="btn btn-modeul px-4" id="btnSubmitBook">시트에 저장</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="text-center py-4 text-muted small mt-auto border-top bg-white">
+    <p class="m-0 font-serif">모들(Model) 독서모임 · 구글 스프레드시트 기반 공유 서재</p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // ==========================================
+    // 여기에 Google Apps Script 배포 URL 입력
+    // ==========================================
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzpEphQSqZ65vAikOdrDxkAGKe7R2DlJnPJNHDvp9CGFPOPFz_9FWeiXzjjkFrwyNUiwA/exec";
+
+    let booksData = [];
+    let currentView = 'grid';
+
+    // 기본 대체 표지
+    const DEFAULT_COVER = 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=400&q=80';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initEventListeners();
+      fetchBooksFromSheet();
+    });
+
+    function initEventListeners() {
+      document.getElementById('searchInput').addEventListener('input', renderBooks);
+      document.getElementById('categoryFilter').addEventListener('change', renderBooks);
+      document.getElementById('yearFilter').addEventListener('change', renderBooks);
+
+      document.getElementById('viewGridBtn').addEventListener('click', () => setView('grid'));
+      document.getElementById('viewTableBtn').addEventListener('click', () => setView('table'));
+
+      document.getElementById('btnSearchCover').addEventListener('click', searchBookCover);
+      document.getElementById('autoBookTitle').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          searchBookCover();
+        }
+      });
+
+      document.getElementById('bookForm').addEventListener('submit', handleBookSubmit);
+    }
+
+    function setView(view) {
+      currentView = view;
+      document.getElementById('viewGridBtn').classList.toggle('active', view === 'grid');
+      document.getElementById('viewTableBtn').classList.toggle('active', view === 'table');
+      renderBooks();
+    }
+
+    // 시트에서 책 목록 가져오기 (doGet)
+    async function fetchBooksFromSheet() {
+      const loading = document.getElementById('loadingBox');
+      loading.classList.remove('d-none');
+
+      if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("여기에_구글")) {
+        loading.classList.add('d-none');
+        alert("index.html 상단의 GOOGLE_SCRIPT_URL 변수에 구글 웹 앱 URL을 입력해주세요!");
+        return;
+      }
+
+      try {
+        const response = await fetch(GOOGLE_SCRIPT_URL);
+        const data = await response.json();
+        booksData = Array.isArray(data) ? data : [];
+        updateYearOptions();
+        renderBooks();
+      } catch (err) {
+        console.error("데이터 로드 실패:", err);
+        alert("구글 시트 데이터를 불러오지 못했습니다. 배포 권한이 '모든 사용자'로 되어 있는지 확인해 주세요.");
+      } finally {
+        loading.classList.add('d-none');
+      }
+    }
+
+    // 새 책 구글 시트에 저장 (doPost)
+    async function handleBookSubmit(e) {
+      e.preventDefault();
+      const submitBtn = document.getElementById('btnSubmitBook');
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> 저장 중...';
+
+      const newBook = {
+        id: Date.now().toString(),
+        title: document.getElementById('inputTitle').value.trim(),
+        author: document.getElementById('inputAuthor').value.trim(),
+        publisher: document.getElementById('inputPublisher').value.trim(),
+        date: document.getElementById('inputDate').value || '',
+        category: document.getElementById('inputCategory').value,
+        cover: document.getElementById('inputCover').value.trim() || DEFAULT_COVER
+      };
+
+      try {
+        // GAS 웹앱은 리디렉션 처리와 CORS 특성상 mode: 'no-cors' 전송을 주로 사용합니다.
+        await fetch(GOOGLE_SCRIPT_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newBook)
+        });
+
+        // 프론트 즉시 반영
+        booksData.unshift(newBook);
+        updateYearOptions();
+        renderBooks();
+
+        // 폼 초기화 및 모달 닫기
+        document.getElementById('bookForm').reset();
+        document.getElementById('autoBookTitle').value = '';
+        bootstrap.Modal.getInstance(document.getElementById('addBookModal')).hide();
+      } catch (err) {
+        console.error("저장 실패:", err);
+        alert("저장 중 오류가 발생했습니다.");
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = '시트에 저장';
+      }
+    }
+
+    // Google Books API를 이용한 도서 정보 및 표지 검색
+    async function searchBookCover() {
+      const query = document.getElementById('autoBookTitle').value.trim();
+      const dropdown = document.getElementById('searchResultsDropdown');
+      if (!query) return;
+
+      dropdown.innerHTML = '<div class="list-group-item small text-muted"><span class="spinner-border spinner-border-sm me-1"></span>검색 중...</div>';
+      dropdown.classList.remove('d-none');
+
+      try {
+        const res = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&maxResults=5&langRestrict=ko`);
+        const data = await res.json();
+        dropdown.innerHTML = '';
+
+        if (!data.items || data.items.length === 0) {
+          dropdown.innerHTML = '<div class="list-group-item small text-muted">일치하는 책을 찾지 못했습니다. 직접 입력해주세요.</div>';
+          return;
+        }
+
+        data.items.forEach(item => {
+          const info = item.volumeInfo;
+          const cover = info.imageLinks ? (info.imageLinks.thumbnail || info.imageLinks.smallThumbnail).replace('http://', 'https://') : '';
+          const author = (info.authors || []).join(', ');
+          const publisher = info.publisher || '';
+
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'list-group-item list-group-item-action d-flex align-items-center gap-2 py-2';
+          btn.innerHTML = `
+            ${cover ? `<img src="${cover}" style="width: 32px; height: 44px; object-fit: cover;" class="rounded border">` : '<i class="fa-solid fa-book text-muted"></i>'}
+            <div class="text-truncate" style="font-size: 0.85rem;">
+              <strong class="d-block text-truncate">${info.title}</strong>
+              <span class="text-muted small">${author} | ${publisher}</span>
+            </div>
+          `;
+          btn.onclick = () => {
+            document.getElementById('inputTitle').value = info.title || '';
+            document.getElementById('inputAuthor').value = author;
+            document.getElementById('inputPublisher').value = publisher;
+            document.getElementById('inputCover').value = cover;
+            dropdown.classList.add('d-none');
+          };
+          dropdown.appendChild(btn);
+        });
+      } catch (e) {
+        dropdown.innerHTML = '<div class="list-group-item small text-danger">검색 중 오류가 발생했습니다.</div>';
+      }
+    }
+
+    function updateYearOptions() {
+      const yearSelect = document.getElementById('yearFilter');
+      const years = new Set();
+      booksData.forEach(b => {
+        if (b.date) {
+          const y = b.date.substring(0, 4);
+          if (y) years.add(y);
+        }
+      });
+      const sortedYears = Array.from(years).sort().reverse();
+      const currentSelected = yearSelect.value;
+      yearSelect.innerHTML = '<option value="ALL">전체 연도</option>';
+      sortedYears.forEach(y => {
+        yearSelect.innerHTML += `<option value="${y}">${y}년</option>`;
+      });
+      yearSelect.value = currentSelected;
+    }
+
+    function renderBooks() {
+      const query = document.getElementById('searchInput').value.toLowerCase().trim();
+      const cat = document.getElementById('categoryFilter').value;
+      const yr = document.getElementById('yearFilter').value;
+
+      const filtered = booksData.filter(b => {
+        const matchesQuery = !query || 
+          (b.title && b.title.toLowerCase().includes(query)) ||
+          (b.author && b.author.toLowerCase().includes(query)) ||
+          (b.publisher && b.publisher.toLowerCase().includes(query));
+        const matchesCat = (cat === 'ALL') || (b.category === cat);
+        const matchesYr = (yr === 'ALL') || (b.date && b.date.startsWith(yr));
+        return matchesQuery && matchesCat && matchesYr;
+      });
+
+      document.getElementById('totalBooksCount').textContent = booksData.length;
+
+      const gridContainer = document.getElementById('booksGridContainer');
+      const tableContainer = document.getElementById('booksTableContainer');
+      const emptyState = document.getElementById('emptyState');
+
+      if (filtered.length === 0) {
+        gridContainer.classList.add('d-none');
+        tableContainer.classList.add('d-none');
+        emptyState.classList.remove('d-none');
+        return;
+      }
+      emptyState.classList.add('d-none');
+
+      if (currentView === 'grid') {
+        tableContainer.classList.add('d-none');
+        gridContainer.classList.remove('d-none');
+        renderGrid(filtered);
+      } else {
+        gridContainer.classList.add('d-none');
+        tableContainer.classList.remove('d-none');
+        renderTable(filtered);
+      }
+    }
+
+    function renderGrid(books) {
+      const container = document.getElementById('booksGridContainer');
+      container.innerHTML = '';
+
+      // 책장 선반(3~4권 단위) 배치 연출
+      const rowDiv = document.createElement('div');
+      rowDiv.className = 'row row-cols-2 row-cols-sm-3 row-cols-md-4 g-4';
+
+      books.forEach(b => {
+        const col = document.createElement('div');
+        col.className = 'col';
+        col.innerHTML = `
+          <div class="book-card h-100 d-flex flex-column">
+            <div class="book-spine-effect mb-2">
+              <img src="${b.cover || DEFAULT_COVER}" class="book-cover-img" alt="${b.title}" onerror="this.src='${DEFAULT_COVER}'">
+            </div>
+            <div class="mt-1 flex-grow-1">
+              <span class="badge bg-light text-secondary border mb-1" style="font-size: 0.7rem;">${b.category || '일반'}</span>
+              <h6 class="font-serif fw-bold text-truncate mb-1" title="${b.title}">${b.title}</h6>
+              <p class="small text-muted text-truncate m-0" style="font-size: 0.8rem;">${b.author || '저자 미상'}</p>
+              <div class="d-flex justify-content-between align-items-center mt-2 small text-muted" style="font-size: 0.75rem;">
+                <span>${b.publisher || ''}</span>
+                <span>${b.date || ''}</span>
+              </div>
+            </div>
+          </div>
+        `;
+        rowDiv.appendChild(col);
+      });
+
+      container.appendChild(rowDiv);
+      // 책장 선반 바닥 받침 추가
+      const shelfWood = document.createElement('div');
+      shelfWood.className = 'bookshelf-shelf mt-4';
+      container.appendChild(shelfWood);
+    }
+
+    function renderTable(books) {
+      const tbody = document.getElementById('booksTableBody');
+      tbody.innerHTML = '';
+      books.forEach(b => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>
+            <img src="${b.cover || DEFAULT_COVER}" style="width: 44px; height: 62px; object-fit: cover;" class="rounded shadow-sm" onerror="this.src='${DEFAULT_COVER}'">
+          </td>
+          <td><strong class="font-serif">${b.title}</strong></td>
+          <td class="text-muted small">${b.author || '-'}</td>
+          <td class="text-muted small">${b.publisher || '-'}</td>
+          <td class="small text-nowrap">${b.date || '-'}</td>
+          <td><span class="badge bg-light text-secondary border">${b.category || '신앙/영성'}</span></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+  </script>
+</body>
+</html>
