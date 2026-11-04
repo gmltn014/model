@@ -399,19 +399,43 @@
       }
     }
 
+// ISO 문자열이나 Date 값을 YYYY-MM 형식으로 변환
+function formatYearMonth(val) {
+  if (!val) return '-';
+  const d = new Date(val);
+  if (isNaN(d.getTime())) return String(val).substring(0, 7);
+  // 한국 시간(KST) 기준 연-월 추출
+  const year = d.toLocaleDateString('ko-KR', { timeZone: 'Asia/Seoul', year: 'numeric' }).replace(/[^0-9]/g, '');
+  const month = d.toLocaleDateString('ko-KR', { timeZone: 'Asia/Seoul', month: '2-digit' }).replace(/[^0-9]/g, '');
+  return `${year}-${month}`;
+}
+
+// ISO 문자열이나 Date 값을 YYYY-MM-DD 형식으로 변환
+function formatDateOnly(val) {
+  if (!val) return '-';
+  const d = new Date(val);
+  if (isNaN(d.getTime())) return String(val).substring(0, 10);
+  const year = d.toLocaleDateString('ko-KR', { timeZone: 'Asia/Seoul', year: 'numeric' }).replace(/[^0-9]/g, '');
+  const month = d.toLocaleDateString('ko-KR', { timeZone: 'Asia/Seoul', month: '2-digit' }).replace(/[^0-9]/g, '');
+  const day = d.toLocaleDateString('ko-KR', { timeZone: 'Asia/Seoul', day: '2-digit' }).replace(/[^0-9]/g, '');
+  return `${year}-${month}-${day}`;
+}
+    
     // 책 클릭 시 상세 모달 열기
     function openBookDetail(book) {
-      document.getElementById('detailCover').src = book.cover || DEFAULT_COVER;
-      document.getElementById('detailTitle').textContent = book.title;
-      document.getElementById('detailAuthor').textContent = book.author || '저자 미상';
-      document.getElementById('detailCategory').textContent = book.category || '기타';
-      document.getElementById('detailPublisher').textContent = book.publisher || '-';
-      document.getElementById('detailPubDate').textContent = book.pubDate || '-';
-      document.getElementById('detailDate').textContent = book.date ? `${book.date} 모임` : '-';
+  document.getElementById('detailCover').src = book.cover || DEFAULT_COVER;
+  document.getElementById('detailTitle').textContent = book.title;
+  document.getElementById('detailAuthor').textContent = book.author || '저자 미상';
+  document.getElementById('detailCategory').textContent = book.category || '기타';
+  document.getElementById('detailPublisher').textContent = book.publisher || '-';
+  
+  // 날짜 변환 적용
+  document.getElementById('detailPubDate').textContent = formatDateOnly(book.pubDate);
+  document.getElementById('detailDate').textContent = book.date ? `${formatYearMonth(book.date)} 모임` : '-';
 
-      const detailModal = new bootstrap.Modal(document.getElementById('bookDetailModal'));
-      detailModal.show();
-    }
+  const detailModal = new bootstrap.Modal(document.getElementById('bookDetailModal'));
+  detailModal.show();
+}
 
     // 새 책 구글 시트에 저장
     async function handleBookSubmit(e) {
@@ -585,7 +609,7 @@
               <p class="small text-muted text-truncate m-0" style="font-size: 0.8rem;">${b.author || '저자 미상'}</p>
               <div class="d-flex justify-content-between align-items-center mt-2 small text-muted" style="font-size: 0.75rem;">
                 <span class="text-truncate" style="max-width: 60%;">${b.publisher || ''}</span>
-                <span>${b.date || ''}</span>
+                <<span>${formatYearMonth(b.date)}</span>
               </div>
             </div>
           </div>
@@ -613,7 +637,7 @@
           <td><strong class="font-serif">${b.title}</strong></td>
           <td class="text-muted small">${b.author || '-'}</td>
           <td class="text-muted small">${b.publisher || '-'}</td>
-          <td class="small text-nowrap">${b.date || '-'}</td>
+          <td class="small text-nowrap">${formatYearMonth(b.date)}</td>
           <td><span class="badge bg-light text-secondary border">${b.category || '신앙/영성'}</span></td>
         `;
         tbody.appendChild(tr);
