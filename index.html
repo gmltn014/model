@@ -377,27 +377,30 @@
 
     // 시트에서 책 목록 가져오기
     async function fetchBooksFromSheet() {
-      const loading = document.getElementById('loadingBox');
-      loading.classList.remove('d-none');
+  const loading = document.getElementById('loadingBox');
+  loading.classList.remove('d-none');
 
-      if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("여기에_구글")) {
-        loading.classList.add('d-none');
-        alert("index.html 상단의 GOOGLE_SCRIPT_URL 변수에 구글 웹 앱 URL을 입력해주세요!");
-        return;
-      }
+  if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("여기에_구글")) {
+    loading.classList.add('d-none');
+    alert("index.html 상단의 GOOGLE_SCRIPT_URL 변수에 구글 웹 앱 URL을 입력해주세요!");
+    return;
+  }
 
-      try {
-        const response = await fetch(GOOGLE_SCRIPT_URL);
-        const data = await response.json();
-        booksData = Array.isArray(data) ? data : [];
-        updateYearOptions();
-        renderBooks();
-      } catch (err) {
-        console.error("데이터 로드 실패:", err);
-      } finally {
-        loading.classList.add('d-none');
-      }
-    }
+  try {
+    const response = await fetch(GOOGLE_SCRIPT_URL);
+    const data = await response.json();
+    
+    // 가져온 데이터를 역순(최신 등록된 책이 맨 위/앞으로)으로 뒤집기
+    booksData = Array.isArray(data) ? data.reverse() : [];
+    
+    updateYearOptions();
+    renderBooks();
+  } catch (err) {
+    console.error("데이터 로드 실패:", err);
+  } finally {
+    loading.classList.add('d-none');
+  }
+}
 
 // ISO 문자열이나 Date 값을 YYYY-MM 형식으로 변환
 function formatYearMonth(val) {
