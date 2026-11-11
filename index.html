@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+  <meta name="referrer" content="no-referrer">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>모들(Model) 서재 - 독서모임 책장</title>
@@ -213,38 +214,39 @@
   </main>
 
   <!-- 도서 상세 모달 -->
-  <div class="modal fade" id="bookDetailModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content border-0 shadow">
-        <div class="modal-header bg-light border-0 pb-0">
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body p-4 pt-2">
-          <div class="text-center mb-3">
-            <div class="d-inline-block book-spine-effect shadow" style="width: 140px;">
-              <img id="detailCover" src="" class="book-cover-img" alt="">
-            </div>
-            <div class="mt-3">
-              <span id="detailCategory" class="badge bg-secondary-subtle text-secondary border mb-2">분류</span>
-              <h5 id="detailTitle" class="fw-bold font-serif mb-1">도서 제목</h5>
-              <p id="detailAuthor" class="text-muted mb-0">저자명</p>
-            </div>
+<div class="modal fade" id="bookDetailModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header bg-light border-0 pb-0">
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-4 pt-2">
+        <div class="text-center mb-3">
+          <div class="d-inline-block book-spine-effect shadow" style="width: 140px;">
+            <!-- referrerpolicy="no-referrer" 및 onerror 추가 -->
+            <img id="detailCover" src="" class="book-cover-img" alt="" referrerpolicy="no-referrer" onerror="this.src='https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=400&q=80'">
           </div>
-          <div class="bg-light p-3 rounded-3 small">
-            <div class="row g-2">
-              <div class="col-6"><span class="text-muted">출판사:</span> <span id="detailPublisher" class="fw-bold">-</span></div>
-              <div class="col-6"><span class="text-muted">출판일:</span> <span id="detailPubDate" class="fw-bold">-</span></div>
-              <div class="col-12"><span class="text-muted">모임 진행 연월:</span> <span id="detailDate" class="fw-bold text-success">-</span></div>
-            </div>
+          <div class="mt-3">
+            <span id="detailCategory" class="badge bg-secondary-subtle text-secondary border mb-2">분류</span>
+            <h5 id="detailTitle" class="fw-bold font-serif mb-1">도서 제목</h5>
+            <p id="detailAuthor" class="text-muted mb-0">저자명</p>
           </div>
         </div>
-        <div class="modal-footer border-0 pt-0">
-          <button type="button" class="btn btn-secondary btn-sm px-3" data-bs-dismiss="modal">닫기</button>
+        <div class="bg-light p-3 rounded-3 small">
+          <div class="row g-2">
+            <div class="col-6"><span class="text-muted">출판사:</span> <span id="detailPublisher" class="fw-bold">-</span></div>
+            <div class="col-6"><span class="text-muted">출판일:</span> <span id="detailPubDate" class="fw-bold">-</span></div>
+            <div class="col-12"><span class="text-muted">모임 진행 연월:</span> <span id="detailDate" class="fw-bold text-success">-</span></div>
+          </div>
         </div>
+      </div>
+      <div class="modal-footer border-0 pt-0">
+        <button type="button" class="btn btn-secondary btn-sm px-3" data-bs-dismiss="modal">닫기</button>
       </div>
     </div>
   </div>
-
+</div>
+  
   <!-- 새 도서 등록 모달 -->
   <div class="modal fade" id="addBookModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -624,6 +626,8 @@ function formatDateOnly(val) {
       const shelfWood = document.createElement('div');
       shelfWood.className = 'bookshelf-shelf mt-4';
       container.appendChild(shelfWood);
+
+      <img src="${b.cover || DEFAULT_COVER}" class="book-cover-img" alt="${b.title}" referrerpolicy="no-referrer" onerror="this.src='${DEFAULT_COVER}'">
     }
 
     function renderTable(books) {
@@ -645,6 +649,7 @@ function formatDateOnly(val) {
         `;
         tbody.appendChild(tr);
       });
+      <img src="${b.cover || DEFAULT_COVER}" style="width: 44px; height: 62px; object-fit: cover;" class="rounded shadow-sm" referrerpolicy="no-referrer" onerror="this.src='${DEFAULT_COVER}'">
     }
   </script>
 </body>
