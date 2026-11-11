@@ -593,64 +593,63 @@ function formatDateOnly(val) {
       }
     }
 
-    function renderGrid(books) {
-      const container = document.getElementById('booksGridContainer');
-      container.innerHTML = '';
+function renderGrid(books) {
+  const container = document.getElementById('booksGridContainer');
+  container.innerHTML = '';
 
-      const rowDiv = document.createElement('div');
-      rowDiv.className = 'row row-cols-2 row-cols-sm-3 row-cols-md-4 g-4';
+  const rowDiv = document.createElement('div');
+  rowDiv.className = 'row row-cols-2 row-cols-sm-3 row-cols-md-4 g-4';
 
-      books.forEach(b => {
-        const col = document.createElement('div');
-        col.className = 'col';
-        col.innerHTML = `
-          <div class="book-card h-100 d-flex flex-column" onclick='openBookDetail(${JSON.stringify(b).replace(/'/g, "&apos;")})'>
-            <div class="book-spine-effect mb-2">
-              <img src="${b.cover || DEFAULT_COVER}" class="book-cover-img" alt="${b.title}" onerror="this.src='${DEFAULT_COVER}'">
-            </div>
-            <div class="mt-1 flex-grow-1">
-              <span class="badge bg-light text-secondary border mb-1" style="font-size: 0.7rem;">${b.category || '일반'}</span>
-              <h6 class="font-serif fw-bold text-truncate mb-1" title="${b.title}">${b.title}</h6>
-              <p class="small text-muted text-truncate m-0" style="font-size: 0.8rem;">${b.author || '저자 미상'}</p>
-              <div class="d-flex justify-content-between align-items-center mt-2 small text-muted" style="font-size: 0.75rem;">
-                <span class="text-truncate" style="max-width: 60%;">${b.publisher || ''}</span>
-                <span>${formatYearMonth(b.date)}</span>
-              </div>
-            </div>
+  books.forEach(b => {
+    const col = document.createElement('div');
+    col.className = 'col';
+    col.innerHTML = `
+      <div class="book-card h-100 d-flex flex-column" onclick='openBookDetail(${JSON.stringify(b).replace(/'/g, "&apos;")})'>
+        <div class="book-spine-effect mb-2">
+          <!-- 여기에 referrerpolicy="no-referrer" 적용 -->
+          <img src="${b.cover || DEFAULT_COVER}" class="book-cover-img" alt="${b.title}" referrerpolicy="no-referrer" onerror="this.src='${DEFAULT_COVER}'">
+        </div>
+        <div class="mt-1 flex-grow-1">
+          <span class="badge bg-light text-secondary border mb-1" style="font-size: 0.7rem;">${b.category || '일반'}</span>
+          <h6 class="font-serif fw-bold text-truncate mb-1" title="${b.title}">${b.title}</h6>
+          <p class="small text-muted text-truncate m-0" style="font-size: 0.8rem;">${b.author || '저자 미상'}</p>
+          <div class="d-flex justify-content-between align-items-center mt-2 small text-muted" style="font-size: 0.75rem;">
+            <span class="text-truncate" style="max-width: 60%;">${b.publisher || ''}</span>
+            <span>${formatYearMonth(b.date)}</span>
           </div>
-        `;
-        rowDiv.appendChild(col);
-      });
+        </div>
+      </div>
+    `;
+    rowDiv.appendChild(col);
+  });
 
-      container.appendChild(rowDiv);
-      const shelfWood = document.createElement('div');
-      shelfWood.className = 'bookshelf-shelf mt-4';
-      container.appendChild(shelfWood);
+  container.appendChild(rowDiv);
+  const shelfWood = document.createElement('div');
+  shelfWood.className = 'bookshelf-shelf mt-4';
+  container.appendChild(shelfWood);
+}
 
-      <img src="${b.cover || DEFAULT_COVER}" class="book-cover-img" alt="${b.title}" referrerpolicy="no-referrer" onerror="this.src='${DEFAULT_COVER}'">
-    }
-
-    function renderTable(books) {
-      const tbody = document.getElementById('booksTableBody');
-      tbody.innerHTML = '';
-      books.forEach(b => {
-        const tr = document.createElement('tr');
-        tr.style.cursor = 'pointer';
-        tr.onclick = () => openBookDetail(b);
-        tr.innerHTML = `
-          <td>
-            <img src="${b.cover || DEFAULT_COVER}" style="width: 44px; height: 62px; object-fit: cover;" class="rounded shadow-sm" onerror="this.src='${DEFAULT_COVER}'">
-          </td>
-          <td><strong class="font-serif">${b.title}</strong></td>
-          <td class="text-muted small">${b.author || '-'}</td>
-          <td class="text-muted small">${b.publisher || '-'}</td>
-          <td class="small text-nowrap">${formatYearMonth(b.date)}</td>
-          <td><span class="badge bg-light text-secondary border">${b.category || '신앙/영성'}</span></td>
-        `;
-        tbody.appendChild(tr);
-      });
-      <img src="${b.cover || DEFAULT_COVER}" style="width: 44px; height: 62px; object-fit: cover;" class="rounded shadow-sm" referrerpolicy="no-referrer" onerror="this.src='${DEFAULT_COVER}'">
-    }
+function renderTable(books) {
+  const tbody = document.getElementById('booksTableBody');
+  tbody.innerHTML = '';
+  books.forEach(b => {
+    const tr = document.createElement('tr');
+    tr.style.cursor = 'pointer';
+    tr.onclick = () => openBookDetail(b);
+    tr.innerHTML = `
+      <td>
+        <!-- 여기에 referrerpolicy="no-referrer" 적용 -->
+        <img src="${b.cover || DEFAULT_COVER}" style="width: 44px; height: 62px; object-fit: cover;" class="rounded shadow-sm" referrerpolicy="no-referrer" onerror="this.src='${DEFAULT_COVER}'">
+      </td>
+      <td><strong class="font-serif">${b.title}</strong></td>
+      <td class="text-muted small">${b.author || '-'}</td>
+      <td class="text-muted small">${b.publisher || '-'}</td>
+      <td class="small text-nowrap">${formatYearMonth(b.date)}</td>
+      <td><span class="badge bg-light text-secondary border">${b.category || '기타'}</span></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
   </script>
 </body>
 </html>
